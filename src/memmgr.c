@@ -222,6 +222,14 @@ void memmgr_free_aligned(const mem_block_t block) {
     unlock_mutex();
 }
 
+void destroy_mutex(void) {
+#ifdef _WIN32
+    DeleteCriticalSection(&mem_mutex);
+#else
+    pthread_mutex_destroy(&mem_mutex);
+#endif
+}
+
 void memmgr_cleanup(void) {
     lock_mutex();
     for (size_t index = 0; index < block_count; ++index) {
@@ -235,6 +243,7 @@ void memmgr_cleanup(void) {
         log_file = nullptr;
     }
     unlock_mutex();
+    destroy_mutex();
 }
 
 void memmgr_debug(void) {
