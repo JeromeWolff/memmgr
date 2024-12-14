@@ -58,6 +58,7 @@ void memmgr_init(const mem_error_handler_t error_handler, const char *log_path) 
 #ifdef _WIN32
     InitializeCriticalSection(&mem_mutex);
 #endif
+    atexit(memmgr_cleanup);
 }
 
 static void lock_mutex() {
