@@ -20,6 +20,7 @@ static mem_tracker_t allocated_blocks[MAXIMAL_BLOCKS];
 static size_t block_count = 0;
 static size_t allocated_bytes = 0;
 static size_t total_freed_bytes = 0;
+static int initialized = 0;
 
 static mem_error_handler_t global_error_handler = nullptr;
 static FILE *log_file = nullptr;
@@ -44,6 +45,11 @@ static void log_message(const char *message) {
 }
 
 void memmgr_init(const mem_error_handler_t error_handler, const char *log_path) {
+    if (initialized) {
+        fprintf(stderr, "memmgr already initialized\n");
+        return;
+    }
+    initialized = 1;
     global_error_handler = error_handler ? error_handler : default_global_error_handler;
     block_count = 0;
     allocated_bytes = 0;
@@ -199,7 +205,7 @@ void aligned_free_wrapper(void *ptr) {
 #endif
 }
 
-void memmgr_free_aligned(mem_block_t block) {
+void memmgr_free_aligned(const mem_block_t block) {
     lock_mutex();
     for (size_t index = 0; index < block_count; ++index) {
         if (block.ptr == allocated_blocks[index].block.ptr) {
