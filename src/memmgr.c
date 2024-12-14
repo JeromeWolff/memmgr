@@ -186,6 +186,7 @@ void memmgr_free(const mem_block_t block) {
     for (size_t index = 0; index < block_count; ++index) {
         if (allocated_blocks[index].block.ptr == block.ptr) {
             free(block.ptr);
+            allocated_blocks[index].block.ptr = nullptr;
             total_freed_bytes += allocated_blocks[index].block.size;
             allocated_blocks[index] = allocated_blocks[--block_count];
             log_message("Freed memory block");
@@ -224,7 +225,7 @@ void memmgr_free_aligned(const mem_block_t block) {
 void memmgr_cleanup(void) {
     lock_mutex();
     for (size_t index = 0; index < block_count; ++index) {
-        free(allocated_blocks[index].block.ptr);
+        memmgr_free(allocated_blocks[index].block);
         total_freed_bytes += allocated_blocks[index].block.size;
         log_message("Freed remaining memory blocks during cleanup");
     }
